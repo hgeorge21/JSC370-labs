@@ -339,8 +339,8 @@ library(dplyr)</code></pre>
   addCircles(data=mid_station,
              lat=~lat, lng=~lon, popup=&quot;mid station&quot;,
              opacity=1, fillOpacity=1, radius=400, color=&quot;Blue&quot;)</code></pre>
-<div id="htmlwidget-041c5f499873797cb944" style="width:672px;height:480px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-041c5f499873797cb944">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircles","args":[[33.177,35.259,34.257,37.285,39.467,41.384,39.133,28.228,32.564,41.691,43.567,40.477,40.711,38.068,37.578,30.558,41.876,39.173,44.316,43.322,45.097,38.704,33.761,45.699,35.584,48.39,40.893,43.205,40.033,33.463,39.6,42.209,40.28,35.417,42.6,40.217,41.597,34.283,43.767,35.38,31.15,38.427,37.4,44.535,47.104,44.778,39,43.064],[-86.783,-93.093,-111.339,-120.512,-106.15,-72.506,-75.467,-82.156,-82.985,-93.566,-116.24,-88.916,-86.375,-97.275,-84.77,-92.099,-71.021,-76.684,-69.797,-84.688,-94.507,-93.183,-90.758,-110.448,-79.101,-100.024,-97.997,-71.503,-74.353,-105.535,-116.01,-75.98,-83.115,-97.383,-123.364,-76.851,-71.412,-80.567,-99.318,-86.246,-97.717,-113.012,-77.517,-72.614,-122.287,-89.667,-80.274,-108.458],400,null,null,{"interactive":true,"className":"","stroke":true,"color":"Blue","weight":5,"opacity":1,"fill":true,"fillColor":"Blue","fillOpacity":1},"mid station",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null,null]}],"limits":{"lat":[28.228,48.39],"lng":[-123.364,-69.797]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-2ea251f9cffc7d41bfd0" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2ea251f9cffc7d41bfd0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addCircles","args":[[33.177,35.259,34.257,37.285,39.467,41.384,39.133,28.228,32.564,41.691,43.567,40.477,40.711,38.068,37.578,30.558,41.876,39.173,44.316,43.322,45.097,38.704,33.761,45.699,35.584,48.39,40.893,43.205,40.033,33.463,39.6,42.209,40.28,35.417,42.6,40.217,41.597,34.283,43.767,35.38,31.15,38.427,37.4,44.535,47.104,44.778,39,43.064],[-86.783,-93.093,-111.339,-120.512,-106.15,-72.506,-75.467,-82.156,-82.985,-93.566,-116.24,-88.916,-86.375,-97.275,-84.77,-92.099,-71.021,-76.684,-69.797,-84.688,-94.507,-93.183,-90.758,-110.448,-79.101,-100.024,-97.997,-71.503,-74.353,-105.535,-116.01,-75.98,-83.115,-97.383,-123.364,-76.851,-71.412,-80.567,-99.318,-86.246,-97.717,-113.012,-77.517,-72.614,-122.287,-89.667,-80.274,-108.458],400,null,null,{"interactive":true,"className":"","stroke":true,"color":"Blue","weight":5,"opacity":1,"fill":true,"fillColor":"Blue","fillOpacity":1},"mid station",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null,null]}],"limits":{"lat":[28.228,48.39],"lng":[-123.364,-69.797]}},"evals":[],"jsHooks":[]}</script>
 <p>Knit the doc and save it on GitHub.</p>
 </div>
 <div id="question-4-means-of-means" class="section level2">
@@ -352,6 +352,9 @@ library(dplyr)</code></pre>
 <li>Mid: temp &gt;= 20 and temp &lt; 25</li>
 <li>High: temp &gt;= 25</li>
 </ul>
+<pre class="r"><code>met[,state_temperature := mean(temp, na.rm=T), by=STATE]
+met[, temp_cat := fifelse(state_temperature &lt;20, &quot;low-temp&quot;,
+                          fifelse(state_temperature&lt;25,&quot;mid-temp&quot;,&quot;high_temp&quot;))]</code></pre>
 <p>Once you are done with that, you can compute the following:</p>
 <ul>
 <li>Number of entries (records),</li>
@@ -361,6 +364,78 @@ library(dplyr)</code></pre>
 <li>Mean temperature, wind-speed, and atmospheric pressure.</li>
 </ul>
 <p>For each of the temperature levels described before.</p>
+<pre class="r"><code>table(met$temp_cat, useNA=&quot;always&quot;)</code></pre>
+<pre><code>## 
+## high_temp  low-temp  mid-temp      &lt;NA&gt; 
+##    811126    430794   1135423         0</code></pre>
+<pre class="r"><code>tab &lt;- met[, .(
+  N_entries = .N,
+  N_entries_na = sum(is.na(temp_cat)),
+  N_stations = length(unique(USAFID)),
+  N_states = length(unique(STATE)),
+  mean_tep = mean(temp, na.rm=T),
+  mean_wind.sp = mean(wind.sp, na.rm=T),
+  mean_atm.press = mean(atm.press, na.rm=T)
+), by=temp_cat]
+
+knitr::kable(tab, caption=&quot;some info to show&quot;)</code></pre>
+<table style="width:100%;">
+<caption>some info to show</caption>
+<colgroup>
+<col width="11%" />
+<col width="11%" />
+<col width="14%" />
+<col width="12%" />
+<col width="10%" />
+<col width="10%" />
+<col width="14%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">temp_cat</th>
+<th align="right">N_entries</th>
+<th align="right">N_entries_na</th>
+<th align="right">N_stations</th>
+<th align="right">N_states</th>
+<th align="right">mean_tep</th>
+<th align="right">mean_wind.sp</th>
+<th align="right">mean_atm.press</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mid-temp</td>
+<td align="right">1135423</td>
+<td align="right">0</td>
+<td align="right">781</td>
+<td align="right">25</td>
+<td align="right">22.39909</td>
+<td align="right">2.352712</td>
+<td align="right">1014.383</td>
+</tr>
+<tr class="even">
+<td align="left">high_temp</td>
+<td align="right">811126</td>
+<td align="right">0</td>
+<td align="right">555</td>
+<td align="right">12</td>
+<td align="right">27.75066</td>
+<td align="right">2.514644</td>
+<td align="right">1013.738</td>
+</tr>
+<tr class="odd">
+<td align="left">low-temp</td>
+<td align="right">430794</td>
+<td align="right">0</td>
+<td align="right">259</td>
+<td align="right">11</td>
+<td align="right">18.96446</td>
+<td align="right">2.637410</td>
+<td align="right">1014.366</td>
+</tr>
+</tbody>
+</table>
 <p>Knit the document, commit your changes, and push them to GitHub.</p>
 </div>
 <div id="question-5-advanced-regression" class="section level2">
