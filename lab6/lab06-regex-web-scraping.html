@@ -212,9 +212,14 @@ stringr::str_extract(counts, &quot;[0-9,]+&quot;)</code></pre>
 </ul></li>
 </ol>
 <pre class="r"><code>library(httr)
+library(stringr)
 query_ids &lt;- GET(
-  url   = &quot;BASELINE URL&quot;,
-  query = list(&quot;QUERY PARAMETERS&quot;)
+  url   = &quot;https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi&quot;,
+  query = list(
+    db= &#39;pubmed&#39;,
+    term = &#39;covid19 canada&#39;,
+    retmax = 1000
+  )
 )
 
 # Extracting the content of the response of GET
